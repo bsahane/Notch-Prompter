@@ -45,10 +45,10 @@ struct DynamicIslandView: View {
         .frame(width: currentWidth, height: currentHeight)
         .clipShape(NotchShape(topRadius: topCornerRadius, bottomRadius: bottomCornerRadius))
         .shadow(
-            color: .black.opacity(state.isExpanded || isMouseOver ? 0.6 : 0),
-            radius: state.isExpanded ? 6 : 4,
+            color: .black.opacity(state.isExpanded || isMouseOver ? 0.35 : 0),
+            radius: state.isExpanded ? 12 : 4,
             x: 0,
-            y: state.isExpanded ? 4 : 2
+            y: state.isExpanded ? 3 : 1
         )
         .contentShape(NotchShape(topRadius: topCornerRadius, bottomRadius: bottomCornerRadius))
         .onTapGesture { state.toggleExpanded() }

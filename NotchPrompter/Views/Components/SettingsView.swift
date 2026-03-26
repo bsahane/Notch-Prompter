@@ -26,28 +26,36 @@ struct SettingsView: View {
                 .buttonStyle(.plain)
             }
 
-            VStack(alignment: .leading, spacing: 6) {
+            VStack(alignment: .leading, spacing: 8) {
                 Text("Theme")
                     .font(.system(size: 11, weight: .medium))
                     .foregroundStyle(.gray)
 
-                HStack(spacing: 6) {
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 70), spacing: 8)], spacing: 8) {
                     ForEach(PrompterTheme.allCases) { theme in
+                        let isSelected = state.theme == theme
                         Button(action: {
                             state.theme = theme
                             AppSettings.shared.theme = theme.rawValue
                         }) {
-                            VStack(spacing: 3) {
-                                RoundedRectangle(cornerRadius: 4)
-                                    .fill(LinearGradient(colors: theme.previewColors, startPoint: .top, endPoint: .bottom))
-                                    .frame(width: 28, height: 20)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 4)
-                                            .stroke(state.theme == theme ? Color.accentColor : Color.white.opacity(0.15), lineWidth: state.theme == theme ? 1.5 : 0.5)
-                                    )
+                            VStack(spacing: 4) {
+                                ZStack {
+                                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                        .fill(LinearGradient(colors: theme.previewColors, startPoint: .top, endPoint: .bottom))
+                                        .frame(height: 32)
+
+                                    Image(systemName: theme.iconName)
+                                        .font(.system(size: 12, weight: .medium))
+                                        .foregroundStyle(theme.textColor.opacity(0.8))
+                                }
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                        .stroke(isSelected ? Color.accentColor : Color.white.opacity(0.12), lineWidth: isSelected ? 2 : 0.5)
+                                )
+
                                 Text(theme.displayName)
-                                    .font(.system(size: 7, weight: state.theme == theme ? .bold : .regular))
-                                    .foregroundStyle(state.theme == theme ? Color.accentColor : .gray)
+                                    .font(.system(size: 9, weight: isSelected ? .bold : .regular))
+                                    .foregroundStyle(isSelected ? Color.accentColor : .white.opacity(0.6))
                             }
                         }
                         .buttonStyle(.plain)
