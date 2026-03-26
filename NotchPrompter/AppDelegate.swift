@@ -125,12 +125,39 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             button.image?.size = NSSize(width: 16, height: 16)
         }
 
+        rebuildStatusMenu()
+    }
+
+    private func rebuildStatusMenu() {
         let menu = NSMenu()
         menu.addItem(withTitle: "Toggle Panel", action: #selector(togglePanel), keyEquivalent: "t")
         menu.addItem(withTitle: "Open File...", action: #selector(openFileFromMenu), keyEquivalent: "o")
+
+        let recentFiles = AppSettings.shared.recentFiles
+        if !recentFiles.isEmpty {
+            menu.addItem(.separator())
+            let recentHeader = NSMenuItem(title: "Recent Files", action: nil, keyEquivalent: "")
+            recentHeader.isEnabled = false
+            menu.addItem(recentHeader)
+
+            for path in recentFiles {
+                let name = URL(fileURLWithPath: path).lastPathComponent
+                let item = NSMenuItem(title: name, action: #selector(openRecentFile(_:)), keyEquivalent: "")
+                item.representedObject = path
+                item.toolTip = path
+                menu.addItem(item)
+            }
+        }
+
         menu.addItem(.separator())
         menu.addItem(withTitle: "Quit NotchPrompter", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         statusItem?.menu = menu
+    }
+
+    @objc private func openRecentFile(_ sender: NSMenuItem) {
+        guard let path = sender.representedObject as? String else { return }
+        prompterState.loadFromFile(url: URL(fileURLWithPath: path))
+        rebuildStatusMenu()
     }
 
     @objc private func togglePanel() {
@@ -139,6 +166,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     @objc private func openFileFromMenu() {
         prompterState.openFile()
+        rebuildStatusMenu()
     }
 
     // MARK: - Panel Setup

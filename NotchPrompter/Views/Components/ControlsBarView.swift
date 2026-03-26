@@ -14,6 +14,7 @@ struct ControlsBarView: View {
 
             wordCountLabel
             elapsedTimeLabel
+            countdownLabel
             progressSection
         }
         .accessibilityElement(children: .contain)
@@ -82,6 +83,22 @@ struct ControlsBarView: View {
         let mins = Int(seconds) / 60
         let secs = Int(seconds) % 60
         return String(format: "%d:%02d", mins, secs)
+    }
+
+    private var countdownLabel: some View {
+        Group {
+            if state.countdownMinutes > 0 {
+                let remaining = state.countdownRemaining
+                let isUrgent = remaining < 60 && remaining > 0
+                let isOver = remaining <= 0 && state.elapsedTime > 0
+
+                Text(isOver ? "OVER" : formatTime(remaining))
+                    .font(.system(size: 9, weight: .semibold, design: .monospaced))
+                    .foregroundStyle(isOver ? .red : (isUrgent ? .orange : .gray.opacity(0.5)))
+                    .frame(width: isOver ? 30 : 36, alignment: .trailing)
+                    .help("Countdown: \(Int(state.countdownMinutes)) min target")
+            }
+        }
     }
 
     private var playPauseButton: some View {

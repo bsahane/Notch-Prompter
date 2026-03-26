@@ -27,6 +27,9 @@ final class PrompterState {
     var panelOpacity: Double = 1.0
     var showFocusLine = true
     var loadedFileName: String = ""
+    var loadedFilePath: String = ""
+    var countdownMinutes: Double = AppSettings.shared.countdownMinutes
+    var countdownRemaining: TimeInterval { max(0, (countdownMinutes * 60) - elapsedTime) }
 
     init() {
         let filePath = AppSettings.shared.defaultFilePath
@@ -36,8 +39,11 @@ final class PrompterState {
                !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 scriptText = text
                 loadedFileName = url.lastPathComponent
+                loadedFilePath = filePath
                 let ext = url.pathExtension.lowercased()
                 scriptFormat = (ext == "md" || ext == "markdown") ? .markdown : detectFormat(text: text)
+                let savedOffset = AppSettings.shared.scrollPosition(for: filePath)
+                scrollOffset = CGFloat(savedOffset)
                 return
             }
         }
@@ -220,6 +226,7 @@ final class PrompterState {
 
     func toggleExpanded() {
         haptic(.levelChange)
+        if isExpanded { saveCurrentScrollPosition() }
         withAnimation(.interactiveSpring(response: 0.38, dampingFraction: 0.8, blendDuration: 0)) {
             isExpanded.toggle()
             if isExpanded {
@@ -248,6 +255,8 @@ final class PrompterState {
     }
 
     func loadFromFile(url: URL) {
+        saveCurrentScrollPosition()
+
         let ext = url.pathExtension.lowercased()
 
         if ext == "rtf" {
@@ -256,7 +265,9 @@ final class PrompterState {
                 scriptText = attributed.string
                 scriptFormat = .plainText
                 loadedFileName = url.lastPathComponent
-                resetScroll()
+                loadedFilePath = url.path
+                AppSettings.shared.addRecentFile(url.path)
+                restoreScrollPosition(for: url.path)
                 return
             }
         }
@@ -267,7 +278,22 @@ final class PrompterState {
         scriptText = text
         scriptFormat = (ext == "md" || ext == "markdown") ? .markdown : detectFormat(text: text)
         loadedFileName = url.lastPathComponent
-        resetScroll()
+        loadedFilePath = url.path
+        AppSettings.shared.addRecentFile(url.path)
+        restoreScrollPosition(for: url.path)
+    }
+
+    func saveCurrentScrollPosition() {
+        guard !loadedFilePath.isEmpty else { return }
+        AppSettings.shared.saveScrollPosition(Double(scrollOffset), for: loadedFilePath)
+    }
+
+    private func restoreScrollPosition(for path: String) {
+        let saved = AppSettings.shared.scrollPosition(for: path)
+        scrollOffset = CGFloat(saved)
+        progress = 0
+        isPlaying = false
+        elapsedTime = 0
     }
 
     private func detectFormat(text: String) -> ScriptFormat {

@@ -85,6 +85,23 @@ struct SettingsView: View {
                 .frame(width: 40)
             }
 
+            settingRow(title: "Countdown") {
+                HStack(spacing: 6) {
+                    Slider(value: Binding(
+                        get: { state.countdownMinutes },
+                        set: {
+                            state.countdownMinutes = $0
+                            AppSettings.shared.countdownMinutes = $0
+                        }
+                    ), in: 0...30, step: 1)
+                    .frame(width: 100)
+                    Text(state.countdownMinutes > 0 ? "\(Int(state.countdownMinutes))m" : "Off")
+                        .font(.system(size: 9, weight: .medium, design: .monospaced))
+                        .foregroundStyle(.gray)
+                        .frame(width: 28, alignment: .trailing)
+                }
+            }
+
             VStack(alignment: .leading, spacing: 4) {
                 Text("Default File")
                     .font(.system(size: 11, weight: .medium))
