@@ -1,0 +1,296 @@
+import SwiftUI
+
+struct DynamicIslandView: View {
+    @Bindable var state: PrompterState
+    @State private var isMouseOver = false
+
+    private var notchInfo: (width: CGFloat, height: CGFloat, hasNotch: Bool) {
+        AppDelegate.notchInfo()
+    }
+
+    private var collapsedWidth: CGFloat { notchInfo.width }
+    private var collapsedHeight: CGFloat { notchInfo.height }
+
+    private let expandedWidth: CGFloat = 500
+
+    private var currentWidth: CGFloat {
+        if state.isExpanded { return expandedWidth }
+        return isMouseOver ? collapsedWidth + 20 : collapsedWidth
+    }
+    private var currentHeight: CGFloat {
+        if state.isExpanded { return state.expandedHeight }
+        return isMouseOver ? collapsedHeight + 4 : collapsedHeight
+    }
+
+    private var topCornerRadius: CGFloat {
+        if state.isExpanded { return 19 }
+        return 6
+    }
+    private var bottomCornerRadius: CGFloat {
+        if state.isExpanded { return 24 }
+        return isMouseOver ? 16 : 14
+    }
+
+    var body: some View {
+        islandShape
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+    }
+
+    private var islandShape: some View {
+        ZStack(alignment: .top) {
+            notchBackground
+            content
+        }
+        .frame(width: currentWidth, height: currentHeight)
+        .clipShape(NotchShape(topRadius: topCornerRadius, bottomRadius: bottomCornerRadius))
+        .shadow(
+            color: .black.opacity(state.isExpanded || isMouseOver ? 0.6 : 0),
+            radius: state.isExpanded ? 6 : 4,
+            x: 0,
+            y: state.isExpanded ? 4 : 2
+        )
+        .contentShape(NotchShape(topRadius: topCornerRadius, bottomRadius: bottomCornerRadius))
+        .onTapGesture { state.toggleExpanded() }
+        .onHover { hovering in
+            withAnimation(.interactiveSpring(response: 0.38, dampingFraction: 0.8, blendDuration: 0)) {
+                isMouseOver = hovering
+            }
+            if state.isExpanded {
+                state.handleHover(hovering)
+            }
+        }
+        .focusable()
+        .animation(.interactiveSpring(response: 0.38, dampingFraction: 0.8, blendDuration: 0), value: state.isExpanded)
+        .animation(.interactiveSpring(response: 0.38, dampingFraction: 0.8, blendDuration: 0), value: isMouseOver)
+    }
+
+    // MARK: - Background
+
+    private var notchBackground: some View {
+        ZStack {
+            Color.black
+
+            if state.isExpanded {
+                LinearGradient(
+                    colors: [
+                        Color(white: 0.08),
+                        Color.black
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            }
+        }
+    }
+
+    // MARK: - Content
+
+    private var content: some View {
+        Group {
+            if state.isExpanded {
+                expandedContent
+                    .transition(.opacity.combined(with: .scale(scale: 0.95)).animation(.smooth(duration: 0.35)))
+            } else {
+                collapsedContent
+                    .transition(.opacity)
+            }
+        }
+    }
+
+    // MARK: - Collapsed
+
+    private var collapsedContent: some View {
+        HStack(spacing: 0) {
+            GreenDotIndicator()
+                .padding(.leading, 14)
+
+            Spacer()
+
+            if state.hasScript {
+                HStack(spacing: 6) {
+                    MiniProgressBar(progress: state.progress)
+                    if state.isPlaying {
+                        Image(systemName: "waveform")
+                            .font(.system(size: 9, weight: .medium))
+                            .foregroundStyle(.blue)
+                    }
+                }
+                .padding(.trailing, 14)
+            }
+        }
+    }
+
+    // MARK: - Expanded
+
+    private var expandedContent: some View {
+        VStack(spacing: 0) {
+            expandedHeader
+                .padding(.horizontal, 20)
+                .padding(.top, 14)
+                .padding(.bottom, 10)
+
+            separatorLine
+
+            ZStack {
+                if state.hasScript {
+                    ScrollingTextView(state: state)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                } else {
+                    emptyState
+                }
+
+                if state.isHovered && state.wasPlayingBeforeHover {
+                    pausedOverlay
+                }
+            }
+            .frame(maxHeight: .infinity)
+
+            separatorLine
+
+            ControlsBarView(state: state)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 10)
+
+            resizeHandle
+        }
+    }
+
+    private var resizeHandle: some View {
+        RoundedRectangle(cornerRadius: 1.5)
+            .fill(Color.white.opacity(0.2))
+            .frame(width: 36, height: 3)
+            .padding(.bottom, 6)
+            .gesture(
+                DragGesture()
+                    .onChanged { value in
+                        state.adjustHeight(by: value.translation.height / 10)
+                    }
+            )
+    }
+
+    private var expandedHeader: some View {
+        HStack(spacing: 10) {
+            GreenDotIndicator()
+
+            Text("NotchPrompter")
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundStyle(.gray)
+
+            formatBadge
+
+            Spacer()
+
+            if state.isHovered && state.wasPlayingBeforeHover {
+                Image(systemName: "pause.fill")
+                    .font(.system(size: 9))
+                    .foregroundStyle(.gray)
+                    .transition(.opacity)
+            }
+
+            SpeedIndicator(speed: state.scrollSpeed)
+
+            settingsButton
+        }
+    }
+
+    private var settingsButton: some View {
+        Button(action: { state.showSettings.toggle() }) {
+            Image(systemName: "gearshape.fill")
+                .font(.system(size: 10))
+                .foregroundStyle(state.showSettings ? .blue : .gray)
+                .frame(width: 20, height: 20)
+                .background(Color.white.opacity(state.showSettings ? 0.1 : 0.04), in: Circle())
+        }
+        .buttonStyle(.plain)
+        .popover(isPresented: Binding(
+            get: { state.showSettings },
+            set: { state.showSettings = $0 }
+        ), arrowEdge: .bottom) {
+            SettingsView(state: state)
+                .preferredColorScheme(.dark)
+        }
+    }
+
+    private var formatBadge: some View {
+        Button(action: {
+            state.scriptFormat = state.scriptFormat == .markdown ? .plainText : .markdown
+        }) {
+            Text(state.scriptFormat == .markdown ? "MD" : "TXT")
+                .font(.system(size: 9, weight: .bold, design: .monospaced))
+                .foregroundStyle(state.scriptFormat == .markdown ? .blue : .gray)
+                .padding(.horizontal, 5)
+                .padding(.vertical, 2)
+                .background(
+                    (state.scriptFormat == .markdown ? Color.blue : Color.white)
+                        .opacity(0.1),
+                    in: RoundedRectangle(cornerRadius: 4, style: .continuous)
+                )
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var separatorLine: some View {
+        Rectangle()
+            .fill(Color.white.opacity(0.08))
+            .frame(height: 0.5)
+    }
+
+    private var pausedOverlay: some View {
+        VStack {
+            Spacer()
+            HStack {
+                Spacer()
+                HStack(spacing: 4) {
+                    Image(systemName: "pause.fill")
+                        .font(.system(size: 8))
+                    Text("Paused")
+                        .font(.system(size: 10, weight: .medium))
+                }
+                .foregroundStyle(Color.white.opacity(0.5))
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(Color.white.opacity(0.08), in: Capsule())
+                .padding(8)
+            }
+        }
+        .transition(.opacity.animation(.easeInOut(duration: 0.2)))
+        .allowsHitTesting(false)
+    }
+
+    private var emptyState: some View {
+        VStack(spacing: 10) {
+            ZStack {
+                Circle()
+                    .fill(Color.white.opacity(0.05))
+                    .frame(width: 48, height: 48)
+                Image(systemName: "doc.text.fill")
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundStyle(Color.white.opacity(0.3))
+            }
+
+            Text("Paste your script (\u{2318}V)")
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(Color.white.opacity(0.5))
+
+            Text("or drag a text file here")
+                .font(.system(size: 11))
+                .foregroundStyle(Color.white.opacity(0.3))
+
+            Button(action: { state.openFile() }) {
+                HStack(spacing: 4) {
+                    Image(systemName: "folder.fill")
+                        .font(.system(size: 10))
+                    Text("Open File")
+                        .font(.system(size: 11, weight: .medium))
+                }
+                .foregroundStyle(.blue)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.blue.opacity(0.12), in: Capsule())
+            }
+            .buttonStyle(.plain)
+            .padding(.top, 4)
+        }
+    }
+}

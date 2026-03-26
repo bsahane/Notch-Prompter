@@ -1,0 +1,37 @@
+# Xcode
+build/
+DerivedData/
+*.xcodeproj/xcuserdata/
+*.xcworkspace/xcuserdata/
+*.xccheckout
+*.xcscmblueprint
+*.moved-aside
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Swift Package Manager
+.build/
+Packages/
+Package.resolved
+
+# AI / Development tools
+.claude/
+.cursor/
+.opencode/
+.context/
+_bmad/
+_bmad-output/
+userinput.py
+.user_feedback.txt
+.env
+
+# Archives & Installers
+*.dmg
+*.zip
+*.tar.gz
