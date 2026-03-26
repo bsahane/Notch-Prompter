@@ -55,6 +55,26 @@ struct SettingsView: View {
                     .frame(width: 40)
             }
 
+            settingRow(title: "Opacity") {
+                HStack(spacing: 6) {
+                    Image(systemName: "eye.slash")
+                        .font(.system(size: 8))
+                        .foregroundStyle(.gray)
+                    Slider(value: Binding(
+                        get: { state.panelOpacity },
+                        set: { state.panelOpacity = $0 }
+                    ), in: 0.3...1.0, step: 0.1)
+                    .frame(width: 100)
+                    Image(systemName: "eye")
+                        .font(.system(size: 8))
+                        .foregroundStyle(.gray)
+                    Text("\(Int(state.panelOpacity * 100))%")
+                        .font(.system(size: 9, weight: .medium, design: .monospaced))
+                        .foregroundStyle(.gray)
+                        .frame(width: 28, alignment: .trailing)
+                }
+            }
+
             settingRow(title: "Focus Line") {
                 Toggle("", isOn: Binding(
                     get: { state.showFocusLine },
