@@ -118,6 +118,7 @@ struct DynamicIslandView: View {
                 )
             }
         }
+        .opacity(state.isExpanded ? state.panelOpacity : 1.0)
     }
 
     // MARK: - Content
@@ -193,7 +194,6 @@ struct DynamicIslandView: View {
                 }
             }
             .frame(maxHeight: .infinity)
-            .opacity(state.panelOpacity)
 
             separatorLine
 
@@ -206,16 +206,29 @@ struct DynamicIslandView: View {
     }
 
     private var resizeHandle: some View {
-        RoundedRectangle(cornerRadius: 1.5)
-            .fill(Color.white.opacity(0.2))
-            .frame(width: 36, height: 3)
-            .padding(.bottom, 6)
-            .gesture(
-                DragGesture()
-                    .onChanged { value in
-                        state.adjustHeight(by: value.translation.height / 10)
-                    }
-            )
+        VStack(spacing: 0) {
+            Color.clear.frame(height: 6)
+            RoundedRectangle(cornerRadius: 1.5)
+                .fill(Color.white.opacity(0.2))
+                .frame(width: 36, height: 3)
+            Color.clear.frame(height: 6)
+        }
+        .frame(height: 15)
+        .frame(maxWidth: .infinity)
+        .contentShape(Rectangle())
+        .highPriorityGesture(
+            DragGesture()
+                .onChanged { value in
+                    state.adjustHeight(by: value.translation.height / 10)
+                }
+        )
+        .onHover { hovering in
+            if hovering {
+                NSCursor.resizeUpDown.push()
+            } else {
+                NSCursor.pop()
+            }
+        }
     }
 
     private var expandedHeader: some View {

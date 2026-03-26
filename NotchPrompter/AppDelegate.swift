@@ -79,6 +79,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
+        UserDefaults.standard.set(500, forKey: "NSInitialToolTipDelay")
         setupMainMenu()
         setupStatusBarItem()
         setupPanel()
