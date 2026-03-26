@@ -12,9 +12,12 @@ struct ControlsBarView: View {
 
             Spacer()
 
+            wordCountLabel
             elapsedTimeLabel
             progressSection
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Teleprompter controls")
     }
 
     private var headerNavButtons: some View {
@@ -27,6 +30,8 @@ struct ControlsBarView: View {
                     .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 4))
             }
             .buttonStyle(.plain)
+            .help("Previous header (\u{2190})")
+            .accessibilityLabel("Previous header")
 
             Button(action: { state.jumpToNextHeader() }) {
                 Image(systemName: "chevron.right")
@@ -36,6 +41,8 @@ struct ControlsBarView: View {
                     .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 4))
             }
             .buttonStyle(.plain)
+            .help("Next header (\u{2192})")
+            .accessibilityLabel("Next header")
         }
     }
 
@@ -48,6 +55,19 @@ struct ControlsBarView: View {
                 .background(Color.white.opacity(0.06), in: RoundedRectangle(cornerRadius: 4))
         }
         .buttonStyle(.plain)
+        .help("Rewind to start")
+        .accessibilityLabel("Rewind")
+    }
+
+    private var wordCountLabel: some View {
+        Group {
+            if state.hasScript {
+                Text("\(state.wordCount)w")
+                    .font(.system(size: 8, weight: .medium, design: .monospaced))
+                    .foregroundStyle(.gray.opacity(0.5))
+                    .help("\(state.wordCount) words \u{2022} \(state.estimatedReadingTime)")
+            }
+        }
     }
 
     private var elapsedTimeLabel: some View {
@@ -55,6 +75,7 @@ struct ControlsBarView: View {
             .font(.system(size: 9, weight: .medium, design: .monospaced))
             .foregroundStyle(.gray.opacity(0.7))
             .frame(width: 36, alignment: .trailing)
+            .accessibilityLabel("Elapsed time: \(formatTime(state.elapsedTime))")
     }
 
     private func formatTime(_ seconds: TimeInterval) -> String {
@@ -72,6 +93,8 @@ struct ControlsBarView: View {
                 .background(Color.white.opacity(0.1), in: Circle())
         }
         .buttonStyle(.plain)
+        .help(state.isPlaying ? "Pause (Space)" : "Play (Space)")
+        .accessibilityLabel(state.isPlaying ? "Pause" : "Play")
     }
 
     private var speedControls: some View {
@@ -84,9 +107,12 @@ struct ControlsBarView: View {
                     .background(Color.white.opacity(0.06), in: Circle())
             }
             .buttonStyle(.plain)
+            .help("Decrease speed (\u{2193})")
+            .accessibilityLabel("Decrease speed")
 
             SpeedIndicator(speed: state.scrollSpeed)
                 .frame(width: 36)
+                .accessibilityLabel("Speed: \(String(format: "%.1f", state.scrollSpeed))x")
 
             Button(action: { state.increaseSpeed() }) {
                 Image(systemName: "plus")
@@ -96,6 +122,8 @@ struct ControlsBarView: View {
                     .background(Color.white.opacity(0.06), in: Circle())
             }
             .buttonStyle(.plain)
+            .help("Increase speed (\u{2191})")
+            .accessibilityLabel("Increase speed")
         }
     }
 
@@ -121,5 +149,6 @@ struct ControlsBarView: View {
                 .foregroundStyle(.gray)
                 .frame(width: 32, alignment: .trailing)
         }
+        .accessibilityLabel("Progress: \(Int(state.progress * 100)) percent")
     }
 }

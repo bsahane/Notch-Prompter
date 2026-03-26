@@ -3,6 +3,7 @@ import SwiftUI
 struct DynamicIslandView: View {
     @Bindable var state: PrompterState
     @State private var isMouseOver = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var notchInfo: (width: CGFloat, height: CGFloat, hasNotch: Bool) {
         AppDelegate.notchInfo()
@@ -51,8 +52,9 @@ struct DynamicIslandView: View {
         )
         .contentShape(NotchShape(topRadius: topCornerRadius, bottomRadius: bottomCornerRadius))
         .onTapGesture { state.toggleExpanded() }
+        .contextMenu { contextMenuItems }
         .onHover { hovering in
-            withAnimation(.interactiveSpring(response: 0.38, dampingFraction: 0.8, blendDuration: 0)) {
+            withAnimation(springAnimation) {
                 isMouseOver = hovering
             }
             if state.isExpanded {
@@ -60,8 +62,43 @@ struct DynamicIslandView: View {
             }
         }
         .focusable()
-        .animation(.interactiveSpring(response: 0.38, dampingFraction: 0.8, blendDuration: 0), value: state.isExpanded)
-        .animation(.interactiveSpring(response: 0.38, dampingFraction: 0.8, blendDuration: 0), value: isMouseOver)
+        .animation(springAnimation, value: state.isExpanded)
+        .animation(springAnimation, value: isMouseOver)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("NotchPrompter")
+        .accessibilityHint(state.isExpanded ? "Double tap to collapse" : "Double tap to expand")
+    }
+
+    private var springAnimation: Animation {
+        reduceMotion ? .easeInOut(duration: 0.2) : .interactiveSpring(response: 0.38, dampingFraction: 0.8, blendDuration: 0)
+    }
+
+    @ViewBuilder
+    private var contextMenuItems: some View {
+        Button(action: { state.togglePlayPause() }) {
+            Label(state.isPlaying ? "Pause" : "Play", systemImage: state.isPlaying ? "pause.fill" : "play.fill")
+        }
+        Button(action: { state.rewindToStart() }) {
+            Label("Rewind", systemImage: "backward.end.fill")
+        }
+        Divider()
+        Button(action: { state.openFile() }) {
+            Label("Open File...", systemImage: "folder")
+        }
+        Button(action: { state.loadFromClipboard() }) {
+            Label("Paste from Clipboard", systemImage: "doc.on.clipboard")
+        }
+        Divider()
+        Button(action: { state.isMirrored.toggle() }) {
+            Label(state.isMirrored ? "Disable Mirror" : "Mirror Text", systemImage: "arrow.left.and.right.righttriangle.left.righttriangle.right")
+        }
+        Button(action: { state.showSettings.toggle() }) {
+            Label("Settings", systemImage: "gearshape")
+        }
+        Divider()
+        if state.hasScript {
+            Text("\(state.wordCount) words \u{2022} \(state.estimatedReadingTime) read")
+        }
     }
 
     // MARK: - Background
@@ -226,6 +263,8 @@ struct DynamicIslandView: View {
                 .background(Color.white.opacity(state.showSettings ? 0.1 : 0.04), in: Circle())
         }
         .buttonStyle(.plain)
+        .help("Settings")
+        .accessibilityLabel("Settings")
         .popover(isPresented: Binding(
             get: { state.showSettings },
             set: { state.showSettings = $0 }
@@ -277,6 +316,8 @@ struct DynamicIslandView: View {
                 )
         }
         .buttonStyle(.plain)
+        .help("Toggle Markdown rendering")
+        .accessibilityLabel("Format: \(state.scriptFormat == .markdown ? "Markdown" : "Plain Text")")
     }
 
     private var separatorLine: some View {

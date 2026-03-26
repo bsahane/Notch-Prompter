@@ -74,6 +74,15 @@ final class PrompterState {
 
     var hasScript: Bool { !scriptText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
 
+    var wordCount: Int {
+        scriptText.split(whereSeparator: { $0.isWhitespace || $0.isNewline }).count
+    }
+
+    var estimatedReadingTime: String {
+        let minutes = max(1, wordCount / 200)
+        return minutes == 1 ? "~1 min" : "~\(minutes) min"
+    }
+
     var renderedText: AttributedString {
         if scriptFormat == .markdown {
             do {
