@@ -6,6 +6,10 @@ struct ScrollingTextView: View {
     private let scrollPixelsPerSecond: CGFloat = 40
     private let frameRate: TimeInterval = 1.0 / 60.0
 
+    private var fadeColor: Color {
+        state.theme.usesGlass ? Color(white: 0.15) : (state.theme == .midnight ? Color(red: 0.03, green: 0.02, blue: 0.1) : (state.theme == .terminal ? Color(red: 0.01, green: 0.04, blue: 0.01) : (state.theme == .warm ? Color(red: 0.06, green: 0.04, blue: 0.02) : .black)))
+    }
+
     var body: some View {
         GeometryReader { geo in
             let visibleHeight = geo.size.height
@@ -79,7 +83,7 @@ struct ScrollingTextView: View {
 
     private func topFade(height: CGFloat) -> some View {
         LinearGradient(
-            colors: [Color.black, .clear],
+            colors: [fadeColor, .clear],
             startPoint: .top,
             endPoint: .bottom
         )
@@ -102,7 +106,7 @@ struct ScrollingTextView: View {
 
     private func bottomFade(height: CGFloat) -> some View {
         LinearGradient(
-            colors: [.clear, Color.black],
+            colors: [.clear, fadeColor],
             startPoint: .top,
             endPoint: .bottom
         )
