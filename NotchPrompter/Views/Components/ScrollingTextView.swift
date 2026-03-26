@@ -39,6 +39,12 @@ struct ScrollingTextView: View {
                 topFade(height: 20)
                     .frame(maxHeight: .infinity, alignment: .top)
 
+                if state.showFocusLine && state.isPlaying {
+                    focusLine
+                        .frame(maxHeight: .infinity, alignment: .top)
+                        .offset(y: visibleHeight * 0.25)
+                }
+
                 bottomFade(height: 20)
                     .frame(maxHeight: .infinity, alignment: .bottom)
             }
@@ -79,6 +85,19 @@ struct ScrollingTextView: View {
         )
         .frame(height: height)
         .allowsHitTesting(false)
+    }
+
+    private var focusLine: some View {
+        Rectangle()
+            .fill(
+                LinearGradient(
+                    colors: [.clear, .blue.opacity(0.15), .blue.opacity(0.3), .blue.opacity(0.15), .clear],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+            )
+            .frame(height: 28)
+            .allowsHitTesting(false)
     }
 
     private func bottomFade(height: CGFloat) -> some View {

@@ -104,6 +104,15 @@ struct DynamicIslandView: View {
             GreenDotIndicator()
                 .padding(.leading, 14)
 
+            if state.hasScript && !state.loadedFileName.isEmpty && isMouseOver {
+                Text(state.loadedFileName)
+                    .font(.system(size: 8, weight: .medium, design: .monospaced))
+                    .foregroundStyle(.white.opacity(0.5))
+                    .lineLimit(1)
+                    .padding(.leading, 6)
+                    .transition(.opacity.combined(with: .move(edge: .leading)))
+            }
+
             Spacer()
 
             if state.hasScript {
@@ -113,6 +122,7 @@ struct DynamicIslandView: View {
                         Image(systemName: "waveform")
                             .font(.system(size: 9, weight: .medium))
                             .foregroundStyle(.blue)
+                            .symbolEffect(.variableColor.iterative, isActive: state.isPlaying)
                     }
                 }
                 .padding(.trailing, 14)
@@ -136,6 +146,7 @@ struct DynamicIslandView: View {
                     ScrollingTextView(state: state)
                         .padding(.horizontal, 20)
                         .padding(.vertical, 10)
+                        .scaleEffect(x: state.isMirrored ? -1 : 1, y: 1)
                 } else {
                     emptyState
                 }
@@ -145,6 +156,7 @@ struct DynamicIslandView: View {
                 }
             }
             .frame(maxHeight: .infinity)
+            .opacity(state.panelOpacity)
 
             separatorLine
 
@@ -170,12 +182,20 @@ struct DynamicIslandView: View {
     }
 
     private var expandedHeader: some View {
-        HStack(spacing: 10) {
+        HStack(spacing: 8) {
             GreenDotIndicator()
 
-            Text("NotchPrompter")
-                .font(.system(size: 11, weight: .semibold))
-                .foregroundStyle(.gray)
+            VStack(alignment: .leading, spacing: 1) {
+                Text("NotchPrompter")
+                    .font(.system(size: 10, weight: .semibold))
+                    .foregroundStyle(.gray)
+                if !state.loadedFileName.isEmpty {
+                    Text(state.loadedFileName)
+                        .font(.system(size: 8, weight: .medium, design: .monospaced))
+                        .foregroundStyle(.white.opacity(0.4))
+                        .lineLimit(1)
+                }
+            }
 
             formatBadge
 
@@ -187,6 +207,9 @@ struct DynamicIslandView: View {
                     .foregroundStyle(.gray)
                     .transition(.opacity)
             }
+
+            mirrorButton
+            opacityButton
 
             SpeedIndicator(speed: state.scrollSpeed)
 
@@ -210,6 +233,32 @@ struct DynamicIslandView: View {
             SettingsView(state: state)
                 .preferredColorScheme(.dark)
         }
+    }
+
+    private var mirrorButton: some View {
+        Button(action: { state.isMirrored.toggle() }) {
+            Image(systemName: "arrow.left.and.right.righttriangle.left.righttriangle.right.fill")
+                .font(.system(size: 9))
+                .foregroundStyle(state.isMirrored ? .blue : .gray)
+                .frame(width: 20, height: 20)
+                .background(Color.white.opacity(state.isMirrored ? 0.1 : 0.04), in: Circle())
+        }
+        .buttonStyle(.plain)
+        .help("Mirror text")
+    }
+
+    private var opacityButton: some View {
+        Button(action: {
+            state.panelOpacity = state.panelOpacity > 0.5 ? 0.5 : 1.0
+        }) {
+            Image(systemName: state.panelOpacity < 1.0 ? "eye.slash.fill" : "eye.fill")
+                .font(.system(size: 9))
+                .foregroundStyle(state.panelOpacity < 1.0 ? .orange : .gray)
+                .frame(width: 20, height: 20)
+                .background(Color.white.opacity(state.panelOpacity < 1.0 ? 0.1 : 0.04), in: Circle())
+        }
+        .buttonStyle(.plain)
+        .help("Toggle transparency")
     }
 
     private var formatBadge: some View {

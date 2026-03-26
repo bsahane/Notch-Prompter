@@ -23,6 +23,10 @@ final class PrompterState {
     var progress: Double = 0
     var expandedHeight: CGFloat = CGFloat(AppSettings.shared.expandedHeight)
     var elapsedTime: TimeInterval = 0
+    var isMirrored = false
+    var panelOpacity: Double = 1.0
+    var showFocusLine = true
+    var loadedFileName: String = ""
 
     init() {
         let filePath = AppSettings.shared.defaultFilePath
@@ -31,12 +35,14 @@ final class PrompterState {
             if let text = try? String(contentsOf: url, encoding: .utf8),
                !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 scriptText = text
+                loadedFileName = url.lastPathComponent
                 let ext = url.pathExtension.lowercased()
                 scriptFormat = (ext == "md" || ext == "markdown") ? .markdown : detectFormat(text: text)
                 return
             }
         }
         scriptText = PrompterState.sampleScript
+        loadedFileName = "Sample Script"
     }
 
     static let sampleScript = """
@@ -238,6 +244,7 @@ final class PrompterState {
                let attributed = NSAttributedString(rtf: rtfData, documentAttributes: nil) {
                 scriptText = attributed.string
                 scriptFormat = .plainText
+                loadedFileName = url.lastPathComponent
                 resetScroll()
                 return
             }
@@ -248,6 +255,7 @@ final class PrompterState {
 
         scriptText = text
         scriptFormat = (ext == "md" || ext == "markdown") ? .markdown : detectFormat(text: text)
+        loadedFileName = url.lastPathComponent
         resetScroll()
     }
 

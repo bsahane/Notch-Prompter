@@ -334,6 +334,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                 case "v":
                     self.prompterState.loadFromClipboard()
                     return nil
+                case "o":
+                    self.prompterState.openFile()
+                    return nil
                 case "=", "+":
                     self.prompterState.increaseFontSize()
                     return nil

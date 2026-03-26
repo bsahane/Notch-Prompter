@@ -55,6 +55,16 @@ struct SettingsView: View {
                     .frame(width: 40)
             }
 
+            settingRow(title: "Focus Line") {
+                Toggle("", isOn: Binding(
+                    get: { state.showFocusLine },
+                    set: { state.showFocusLine = $0 }
+                ))
+                .toggleStyle(.switch)
+                .scaleEffect(0.7)
+                .frame(width: 40)
+            }
+
             VStack(alignment: .leading, spacing: 4) {
                 Text("Default File")
                     .font(.system(size: 11, weight: .medium))
