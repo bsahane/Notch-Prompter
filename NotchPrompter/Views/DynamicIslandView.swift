@@ -156,7 +156,7 @@ struct DynamicIslandView: View {
                     if state.isPlaying {
                         Image(systemName: "waveform")
                             .font(.system(size: 9, weight: .medium))
-                            .foregroundStyle(.blue)
+                            .foregroundStyle(Color.accentColor)
                             .symbolEffect(.variableColor.iterative, isActive: state.isPlaying)
                     }
                 }
@@ -272,7 +272,7 @@ struct DynamicIslandView: View {
         Button(action: { state.showSettings.toggle() }) {
             Image(systemName: "gearshape.fill")
                 .font(.system(size: 10))
-                .foregroundStyle(state.showSettings ? .blue : .gray)
+                .foregroundStyle(state.showSettings ? Color.accentColor : .gray)
                 .frame(width: 20, height: 20)
                 .background(Color.white.opacity(state.showSettings ? 0.1 : 0.04), in: Circle())
         }
@@ -292,7 +292,7 @@ struct DynamicIslandView: View {
         Button(action: { state.isMirrored.toggle() }) {
             Image(systemName: "arrow.left.and.right.righttriangle.left.righttriangle.right.fill")
                 .font(.system(size: 9))
-                .foregroundStyle(state.isMirrored ? .blue : .gray)
+                .foregroundStyle(state.isMirrored ? Color.accentColor : .gray)
                 .frame(width: 20, height: 20)
                 .background(Color.white.opacity(state.isMirrored ? 0.1 : 0.04), in: Circle())
         }
@@ -320,11 +320,11 @@ struct DynamicIslandView: View {
         }) {
             Text(state.scriptFormat == .markdown ? "MD" : "TXT")
                 .font(.system(size: 9, weight: .bold, design: .monospaced))
-                .foregroundStyle(state.scriptFormat == .markdown ? .blue : .gray)
+                .foregroundStyle(state.scriptFormat == .markdown ? Color.accentColor : .gray)
                 .padding(.horizontal, 5)
                 .padding(.vertical, 2)
                 .background(
-                    (state.scriptFormat == .markdown ? Color.blue : Color.white)
+                    (state.scriptFormat == .markdown ? Color.accentColor : Color.white)
                         .opacity(0.1),
                     in: RoundedRectangle(cornerRadius: 4, style: .continuous)
                 )
@@ -388,10 +388,10 @@ struct DynamicIslandView: View {
                     Text("Open File")
                         .font(.system(size: 11, weight: .medium))
                 }
-                .foregroundStyle(.blue)
+                .foregroundStyle(Color.accentColor)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
-                .background(Color.blue.opacity(0.12), in: Capsule())
+                .background(Color.accentColor.opacity(0.12), in: Capsule())
             }
             .buttonStyle(.plain)
             .padding(.top, 4)

@@ -87,10 +87,13 @@ struct ControlsBarView: View {
     private var playPauseButton: some View {
         Button(action: { state.togglePlayPause() }) {
             Image(systemName: state.isPlaying ? "pause.fill" : "play.fill")
+                .contentTransition(.symbolEffect(.replace.downUp.byLayer))
                 .font(.system(size: 12, weight: .bold))
                 .foregroundStyle(.white)
                 .frame(width: 30, height: 30)
-                .background(Color.white.opacity(0.1), in: Circle())
+                .background(
+                    Circle().fill(state.isPlaying ? Color.accentColor.opacity(0.2) : Color.white.opacity(0.1))
+                )
         }
         .buttonStyle(.plain)
         .help(state.isPlaying ? "Pause (Space)" : "Play (Space)")
@@ -136,7 +139,7 @@ struct ControlsBarView: View {
                         .frame(height: 4)
 
                     Capsule()
-                        .fill(.white)
+                        .fill(Color.accentColor)
                         .frame(width: geo.size.width * max(0, min(state.progress, 1)), height: 4)
                 }
                 .frame(height: 4)

@@ -204,6 +204,7 @@ final class PrompterState {
     func togglePlayPause() {
         isPlaying.toggle()
         wasPlayingBeforeHover = false
+        haptic(.generic)
     }
 
     func handleHover(_ hovering: Bool) {
@@ -218,6 +219,7 @@ final class PrompterState {
     }
 
     func toggleExpanded() {
+        haptic(.levelChange)
         withAnimation(.interactiveSpring(response: 0.38, dampingFraction: 0.8, blendDuration: 0)) {
             isExpanded.toggle()
             if isExpanded {
@@ -272,5 +274,9 @@ final class PrompterState {
         let mdPatterns = ["# ", "## ", "**", "__", "- ", "1. ", "> ", "```", "[", "!["]
         let matchCount = mdPatterns.filter { text.contains($0) }.count
         return matchCount >= 2 ? .markdown : .plainText
+    }
+
+    func haptic(_ pattern: NSHapticFeedbackManager.FeedbackPattern) {
+        NSHapticFeedbackManager.defaultPerformer.perform(pattern, performanceTime: .default)
     }
 }

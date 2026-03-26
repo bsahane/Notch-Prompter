@@ -4,12 +4,8 @@ struct SpeedIndicator: View {
     let speed: Double
 
     private var speedColor: Color {
-        if speed >= 2.0 {
-            return Color(nsColor: NSColor(red: 1.0, green: 0.62, blue: 0.04, alpha: 1))
-        }
-        if speed <= 0.5 {
-            return Color(nsColor: NSColor(red: 0.04, green: 0.52, blue: 1.0, alpha: 1))
-        }
+        if speed >= 2.0 { return .orange }
+        if speed <= 0.5 { return Color.accentColor }
         return Color.white.opacity(0.6)
     }
 
