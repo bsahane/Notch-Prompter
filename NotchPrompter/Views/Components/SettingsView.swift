@@ -26,6 +26,35 @@ struct SettingsView: View {
                 .buttonStyle(.plain)
             }
 
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Theme")
+                    .font(.system(size: 11, weight: .medium))
+                    .foregroundStyle(.gray)
+
+                HStack(spacing: 6) {
+                    ForEach(PrompterTheme.allCases) { theme in
+                        Button(action: {
+                            state.theme = theme
+                            AppSettings.shared.theme = theme.rawValue
+                        }) {
+                            VStack(spacing: 3) {
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(LinearGradient(colors: theme.previewColors, startPoint: .top, endPoint: .bottom))
+                                    .frame(width: 28, height: 20)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 4)
+                                            .stroke(state.theme == theme ? Color.accentColor : Color.white.opacity(0.15), lineWidth: state.theme == theme ? 1.5 : 0.5)
+                                    )
+                                Text(theme.displayName)
+                                    .font(.system(size: 7, weight: state.theme == theme ? .bold : .regular))
+                                    .foregroundStyle(state.theme == theme ? Color.accentColor : .gray)
+                            }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+            }
+
             settingRow(title: "Speed") {
                 HStack(spacing: 6) {
                     Slider(value: $speed, in: 0.25...3.0, step: 0.25)

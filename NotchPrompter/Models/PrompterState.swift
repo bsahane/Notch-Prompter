@@ -29,6 +29,7 @@ final class PrompterState {
     var loadedFileName: String = ""
     var loadedFilePath: String = ""
     var countdownMinutes: Double = AppSettings.shared.countdownMinutes
+    var theme: PrompterTheme = PrompterTheme(rawValue: AppSettings.shared.theme) ?? .notchDark
     var countdownRemaining: TimeInterval { max(0, (countdownMinutes * 60) - elapsedTime) }
 
     init() {

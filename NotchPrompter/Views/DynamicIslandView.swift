@@ -102,17 +102,13 @@ struct DynamicIslandView: View {
 
     private var notchBackground: some View {
         ZStack {
-            Color.black
-
-            if state.isExpanded {
-                LinearGradient(
-                    colors: [
-                        Color(white: 0.08),
-                        Color.black
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
+            if state.theme.usesGlass {
+                Rectangle().fill(.ultraThinMaterial)
+            } else {
+                state.theme.background
+                if state.isExpanded {
+                    state.theme.expandedGradient
+                }
             }
         }
         .opacity(state.isExpanded ? state.panelOpacity : 1.0)

@@ -14,6 +14,7 @@ final class AppSettings {
         static let recentFiles = "recentFiles"
         static let scrollPositions = "scrollPositions"
         static let countdownMinutes = "countdownMinutes"
+        static let theme = "theme"
     }
 
     var defaultSpeed: Double {
@@ -44,6 +45,11 @@ final class AppSettings {
     var countdownMinutes: Double {
         get { defaults.double(forKey: Keys.countdownMinutes) }
         set { defaults.set(newValue, forKey: Keys.countdownMinutes); defaults.synchronize() }
+    }
+
+    var theme: String {
+        get { defaults.string(forKey: Keys.theme) ?? "notchDark" }
+        set { defaults.set(newValue, forKey: Keys.theme); defaults.synchronize() }
     }
 
     var recentFiles: [String] {
