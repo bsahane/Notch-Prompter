@@ -57,9 +57,6 @@ struct DynamicIslandView: View {
             withAnimation(springAnimation) {
                 isMouseOver = hovering
             }
-            if state.isExpanded {
-                state.handleHover(hovering)
-            }
         }
         .focusable()
         .animation(springAnimation, value: state.isExpanded)
@@ -194,6 +191,10 @@ struct DynamicIslandView: View {
                 }
             }
             .frame(maxHeight: .infinity)
+            .contentShape(Rectangle())
+            .onHover { hovering in
+                state.handleHover(hovering)
+            }
 
             separatorLine
 
